@@ -1,0 +1,80 @@
+---
+title: 'AWS Grafana Migration'
+date: '2022-10-11'
+tags: [ 'guide', 'aws', 'grafana', 'prometheous']
+draft: false
+summary: 'How we migrated our Prometheus and Grafana based monitoring solution to AWS'
+---
+
+
+# Introduction
+
+## How it started in our data centers
+Before our move to AWS we built a monitoring and visualization solution based on Grafana and Prometheus as we wanted it to be:
+
+Pluggable, in terms of client library languages support for applications code instrumentation to produce metrics and data sources support for metrics query and visualization. Moreover, Prometheus through its pulling offers ability to be plugged on existing monitoring system to scrape metrics.
+OpenSource, again we are a small team and it was important for us that the underlying technology components we select as part of our solution benefit from a good community support in terms of documentation, new features, templates, pre-built dashboards so we can scale through that community and accelerate our own learning curve. Both Prometheus and Grafana have been quite successful and largely adopted to offer us a consistent and large community support.
+Last but not least, security capabilities in terms of identity integration and authentication (Grafana supports SAML identity federation), data in transit encryption (both Grafana and Prometheus support TLS encryption) and access control with delegation capabilities (Grafana offers access control on dashboard, folder or data source level with granular level of access).
+Here is how our architecture pre our AWS implementation.
+
+However, some challenges came across with scaling when it comes to managing the lifecycle of the different secrets allowing our Grafana instance to pull metrics from Prometheus as we’ve decided at that time to go with HTTP Basic Authentication implementation on our different Prometheus servers. Also at the operations level, we had to maintain and scale our Grafana instance including patching, upgrades and all the hassle that comes with that.
+
+While, some of them took a native and serverless approach re-achitecturing their applications, others were either, looking to use the cloud as an extension of the existing infrastructure on-premises or considered a lift and shift scenario of their applications to still get some benefits from the AWS cloud in terms of scalability, automation and cost savings then start their transformation journey in the AWS Cloud.
+
+This meant for our team:
+
+New infrastructure types to monitor that we were not used to on-premises (AWS Lambda, Amazon API Gateway for serverless applications, Amazon ECS for containerized applications)
+New signal sources to handle (Amazon CloudWatch Metrics, CloudWatchLogs and CloudTrail) and doing all this while keeping our centralization across the multiple AWS Accounts part of our AWS multi-account strategy and the different environments setup.
+With all these new challenges and our restricted resources, we didn’t want to go through a full exploration and review process of new solutions including native services AWS provide. Over time, we built a solid expertise around our technology stack so naturally we started looking how we can extend and scale what we’ve already built into the AWS Cloud.
+
+
+Amazon Managed Prometheus and Grafana to rescue … BUT
+The good news for us is that AWS had something for us, a serverless and fully managed services for both Grafana and Prometheus, namely Amazon Managed Grafana and Amazon Managed Service for Prometheus that could allow us to:
+
+Continue leveraging our expertise.
+Continue to benefit from the rich Grafana and Prometheus ecosystems that extend also to the AWS platform (AWS Data Sources Plugins and pre-built community dashboards for Grafana).
+Ease/Simplify integration with AWS ecosystem
+Security integration, it will leverage our AWS SSO implementation to authenticate and manage access control of Grafana users and leverage AWS IAM Roles and Policies to grant granular access to the different AWS compute services.
+Metrics collection. It will be able to collect metrics from applications running on the different compute options spectrum available in AWS by deploying Prometheus server instance on Amazon EC2, ECS or leveraging AWS Distro for OpenTelemetry and AWS Lambda Layers to collect metrics in AWS Lambda and ECS or EKS.
+However, that came also with some design decisions we had to make.
+
+First we have less customization possibilities. As Amazon Managed Grafana is an AWS fully managed service, we don’t have access to the underlying OS which means no ability to deploy custom Grafana Data Source plugins.
+
+We faced specifically this issue when trying to implement some useful security and operations metrics from AWS CloudTrail
+
+For example: number of failed login attempts, number for auto-scaling events
+
+We have centralized our CloudTrail logs into an Amazon S3 bucket, we had no way to query those logs to extract meaningful metrics at the time of writing this blog. We could write our own custom plugin or reuse existing community Athena plugin to do so but again with Amazon Managed Grafana we could not access underlying system to deploy it.
+
+Luckily, we knew that Amazon Managed Grafana has the support of Amazon CloudWatch logs and that AWS CloudTrails multi-account, multi-regions logs, in addition to a S3 bucket, could be also centralized in a CloudWatch Log group but that’s possible only in the management account of our AWS Organization at the time of writing this blog.
+
+So we ended up adding a CloudWatch log group as an additional destination of our existing trail of AWS CloudTrail and put in place a restricted access policy allowing our Amazon Managed Grafana workspace access only that specific log group in the management account. We also setup a retention policy of 30 days for that log group to save our costs meaning that we could visualize metrics only in a 30 days back window in Grafana which met our requirements. If we wanted to dig deeper or get more historical data, then we still could fall back into Amazon Athena service to query the CloudTrail logs from the centralized S3 bucket.
+
+Second design decision we had to go through is a centralized vs decentralized deployment model for our Amazon Managed Prometheus across our different AWS accounts. And we opted for a decentralized model with regards of 3 main considerations:
+
+Cost, by distributing multiple AMP workspaces across our AWS accounts, we could benefit from free tier usage when monitoring small applications and reduce our risk of hitting the service limits. Also to notice that number of workspaces do not impact the cost with the AMP pricing model .
+Operational overhead, it may look counter intuitive that creating multiple AMP workspaces would reduce our operational overhead if you don’t put in the right context. First, AMP is fully managed AWS service thus no infrastructure nor system maintenance. Deployment could even be fully automated using code leveraging the AWS CDK. Second, decentralized approach has better maintainability and auditability for access control when it comes to AWS Roles and Policies maintenance. With this approach we can push centrally a generic role across multiple AWS Accounts to be assumed by AMG in order to pull data from the different AMP workspaces. Last, the decentralized approach simplifies the AWS access policy for our developers, one sample policy granting read/write metrics access on their local AMP workspace.
+Access control, since with a multi AMP workspaces setup, we could easily reflect our AWS Accounts segregation and access control at the data source level in Grafana.
+
+Our final challenge was how to deal with our existing platform on-premises and therefore the monitoring of our on-premises assets ?
+
+Can we leverage AMP workspace to monitor those assets as well ?
+
+Before answering let’s understand how the authentication to Prometheus API is performed with AMP. Each call to the Prometheus API must be authenticated using AWSSig4, it requires the assets performing the call to have an associated AWS Role (authentication) and Policy (authorization) in order to be able to read or write metrics to the AMP workspace. While that’s straightforward when using AWS services (Amazon ECS, EKS, EC2, Lambda) as those natively support associating an AWS IAM role, for on-premises resources, we had to figure out the most efficient way for us to achieve it.
+
+The initial intuitive thought, was having AWS IAM local users acting like service accounts for the different on-premises assets.
+
+Each local AWS IAM user will have associated AWS Access and Secret keys credentials and IAM policies to grant access to the relevant AMP workspaces. Technically doable but means managing those local AWS IAM users lifecycle in terms of provisioning, deprovisioning and auditing. Moreover, the associated AWS Access and Secrets keys are long lived credentials stored locally on the on-premises assets which made us fall back into the same HTTP Basic Auth credentials management hassle we were in before (secrets distribution and life cycle management).
+
+So we decided to leverage AWS System Manager agent installed on our on-premises assets that could be leveraged to Assume an AWS Role with on-premises assets running a supported OS distribution and version. This way, it’s easy ! our on-premises assets like our AWS ones, assume an associated AWS Role with short lived credentials delivered by AWS STS that grant them access to the AMP workspaces to read and write metrics through the AWS IAM policies attached to the role.
+
+Wrap-up
+We shared previously our unpopular opinion for going with Amazon ECS, an AWS platform specific service for containers orchestration instead of Amazon EKS, the manager AWS service for running the popular open source Kubernetes orchestrator. It might look contradicting with our choice made here for monitoring. We choose rather to go with AMP and AMG, managed open source based services rather than with an AWS specific service such as Amazon CloudWatch.
+
+But if you think about our main drivers and considerations for making both decisions, those are similar. Indeed, we are and will remain a small team who need to act and move quickly, so both AMG and AMP offered us the opportunity to reduce our operational overhead as they are managed services, so no infrastructure to maintain while optimizing our learning time since as mentioned in the beginning of this post we’ve already built our skills and muscle on those technologies.
+
+Then, beyond the reuse of our expertise, this choice allowed us to enrich our insights thanks to the integration with AWS ecosystem provided by Grafana. Indeed with Amazon CloudWatch data source plugin for Grafana, in case of applications running on Amazon EC2 within an auto-scaling group, we can easily combine in the same dashboard, some workload specific metrics such CPU, RAM consumption, application custom metrics along with with AWS platform specific metrics such auto-scaling events extracted from Amazon CloudTrail and this combination could help us better adjust our scaling policy.
+
+So in a conclusion, we leveraged the right tools for the right job within the right context and this last piece was a very important parameter in our equation. So we hope that this will help you also make your own decision.
+
+

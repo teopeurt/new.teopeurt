@@ -2,12 +2,12 @@
 
 # Tailwind Nextjs Starter Blog
 
-[![GitHub Repo stars](https://img.shields.io/github/stars/timlrx/tailwind-nextjs-starter-blog?style=social)](https://GitHub.com/timlrx/tailwind-nextjs-starter-blog/stargazers/)
-[![GitHub forks](https://img.shields.io/github/forks/timlrx/tailwind-nextjs-starter-blog?style=social)](https://GitHub.com/timlrx/tailwind-nextjs-starter-blog/network/)
-[![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Ftimlrxx)](https://twitter.com/timlrxx)
-[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&link=https://github.com/sponsors/timlrx)](https://github.com/sponsors/timlrx)
+[![GitHub Repo stars](https://img.shields.io/github/stars/teopeurt/tailwind-nextjs-starter-blog?style=social)](https://GitHub.com/teopeurt/tailwind-nextjs-starter-blog/stargazers/)
+[![GitHub forks](https://img.shields.io/github/forks/teopeurt/tailwind-nextjs-starter-blog?style=social)](https://GitHub.com/teopeurt/tailwind-nextjs-starter-blog/network/)
+[![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Fteopeurtx)](https://twitter.com/teopeurtx)
+[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&link=https://github.com/sponsors/teopeurt)](https://github.com/sponsors/teopeurt)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/timlrx/tailwind-nextjs-starter-blog)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/teopeurt/tailwind-nextjs-starter-blog)
 
 This is a [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/) blogging starter template. Version 2 is based on Next App directory with [React Server Component](https://nextjs.org/docs/getting-started/react-essentials#server-components) and uses [Contentlayer](https://www.contentlayer.dev/) to manage markdown content.
 
@@ -15,14 +15,14 @@ Probably the most feature-rich Next.js markdown blogging template out there. Eas
 
 Check out the documentation below to get started.
 
-Facing issues? Check the [FAQ page](https://github.com/timlrx/tailwind-nextjs-starter-blog/wiki) and do a search on past issues. Feel free to open a new issue if none has been posted previously.
+Facing issues? Check the [FAQ page](https://github.com/teopeurt/tailwind-nextjs-starter-blog/wiki) and do a search on past issues. Feel free to open a new issue if none has been posted previously.
 
 Feature request? Check the past discussions to see if it has been brought up previously. Otherwise, feel free to start a new discussion thread. All ideas are welcomed!
 
 ## Examples V2
 
 - [Demo Blog](https://tailwind-nextjs-starter-blog.vercel.app/) - this repo
-- [My personal blog](https://www.timlrx.com) - modified to auto-generate blog posts with dates
+- [My personal blog](https://www.teopeurt.com) - modified to auto-generate blog posts with dates
 - [ben.codes blog](https://ben.codes) - Benoit's personal blog about software development ([source code](https://github.com/bendotcodes/bendotcodes))
 - [tsix blog](https://tsix.top) - A front-end engineer is used to record some knowledge points in work and study _中文_
 - [SOTO's Blog](https://www.atksoto.com/) - A more personalized personal website upgraded from V1 ([source code](https://github.com/acsoto/soto-blog-nextjs))
@@ -34,7 +34,7 @@ Using the template? Feel free to create a PR and add your blog to this list.
 
 ## Examples V1
 
-[v1-blogs-showcase.webm](https://github.com/timlrx/tailwind-nextjs-starter-blog/assets/28362229/2124c81f-b99d-4431-839c-347e01a2616c)
+[v1-blogs-showcase.webm](https://github.com/teopeurt/tailwind-nextjs-starter-blog/assets/28362229/2124c81f-b99d-4431-839c-347e01a2616c)
 
 Thanks to the community of users and contributors to the template! We are no longer accepting new blog listings over here. If you have updated from version 1 to version 2, feel free to remove your blog from this list and add it to the one above.
 
@@ -88,14 +88,14 @@ I wanted it to be nearly as feature-rich as popular blogging templates like [bea
 - Mobile-friendly view
 - Light and dark theme
 - Font optimization with [next/font](https://nextjs.org/docs/app/api-reference/components/font)
-- Integration with [pliny](https://github.com/timlrx/pliny) that provides:
+- Integration with [pliny](https://github.com/teopeurt/pliny) that provides:
   - Multiple analytics options including [Umami](https://umami.is/), [Plausible](https://plausible.io/), [Simple Analytics](https://simpleanalytics.com/), Posthog and Google Analytics
   - Comments via [Giscus](https://github.com/laymonage/giscus), [Utterances](https://github.com/utterance/utterances) or Disqus
   - Newsletter API and component with support for Mailchimp, Buttondown, Convertkit, Klaviyo, Revue, and Emailoctopus
   - Command palette search with [Kbar](https://github.com/timc1/kbar) or Algolia
-- Server-side syntax highlighting with line numbers and line highlighting via [rehype-prism-plus](https://github.com/timlrx/rehype-prism-plus)
+- Server-side syntax highlighting with line numbers and line highlighting via [rehype-prism-plus](https://github.com/teopeurt/rehype-prism-plus)
 - Math display supported via [KaTeX](https://katex.org/)
-- Citation and bibliography support via [rehype-citation](https://github.com/timlrx/rehype-citation)
+- Citation and bibliography support via [rehype-citation](https://github.com/teopeurt/rehype-citation)
 - Automatic image optimization via [next/image](https://nextjs.org/docs/basic-features/image-optimization)
 - Support for tags - each unique tag will be its own page
 - Support for multiple authors
@@ -120,7 +120,7 @@ I wanted it to be nearly as feature-rich as popular blogging templates like [bea
 1. Clone the repo
 
 ```bash
-npx degit 'timlrx/tailwind-nextjs-starter-blog'
+npx degit 'teopeurt/tailwind-nextjs-starter-blog'
 ```
 
 2. Personalize `siteMetadata.js` (site related information)
@@ -380,8 +380,8 @@ export const SearchProvider = ({ children }) => {
 
 ## Support
 
-Using the template? Support this effort by giving a star on GitHub, sharing your own blog and giving a shoutout on Twitter or becoming a project [sponsor](https://github.com/sponsors/timlrx).
+Using the template? Support this effort by giving a star on GitHub, sharing your own blog and giving a shoutout on Twitter or becoming a project [sponsor](https://github.com/sponsors/teopeurt).
 
 ## Licence
 
-[MIT](https://github.com/timlrx/tailwind-nextjs-starter-blog/blob/main/LICENSE) © [Timothy Lin](https://www.timlrx.com)
+[MIT](https://github.com/teopeurt/tailwind-nextjs-starter-blog/blob/main/LICENSE) © [Timothy Lin](https://www.teopeurt.com)
